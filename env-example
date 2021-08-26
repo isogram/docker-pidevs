@@ -1,0 +1,48 @@
+LOCAL_LISTEN_ADDR=
+MOUNT_OPTIONS=
+
+###
+### Set your user id and group id
+###
+### This should be changed to the value of your local
+### users uid and gid
+###
+### Type `id` on the terminal to find out your values
+###
+NEW_UID=1001
+NEW_GID=100
+
+HOST_PORT_MONGO=27017
+
+HOST_PORT_PGSQL=5432
+PGSQL_HOST_AUTH_METHOD=trust
+PGSQL_ROOT_PASSWORD=postgres
+PGSQL_ROOT_USER=postgres
+
+
+HOST_PORT_MARIADB=3306
+MARIADB_DB_NAME=tests
+MARIADB_ROOT_PASSWORD=root
+MARIADB_ROOT_USER=root
+
+HOST_PORT_RABBIT=
+HOST_PORT_RABBIT_MGMT=
+RABBIT_DEFAULT_PASS=
+RABBIT_DEFAULT_USER=
+RABBIT_DEFAULT_VHOST=
+
+HOST_PORT_REDIS=6379
+
+### Example: Password protection
+###   Add password protection to the Redis server by specifying it should
+###   require a password.
+###   Note: Do not add quotes or spaces to the password
+###
+###   REDIS_ARGS=--requirepass my-redis-root-password
+###
+### Example: Verbosity
+###
+###   REDIS_ARGS=--loglevel verbose
+###
+REDIS_ARGS=
+#REDIS_ARGS=--loglevel verbose --requirepass my-redis-root-password

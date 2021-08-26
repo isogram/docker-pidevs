@@ -1,0 +1,147 @@
+# vim: set ft=yaml:
+version: '2.3'
+
+services:
+  # ------------------------------------------------------------
+  # MariaDB
+  # ------------------------------------------------------------
+  mariadb:
+    image: linuxserver/mariadb:version-10.5.12-r0
+    hostname: mariadb
+    environment:
+      - PUID=${NEW_UID:-1000}
+      - PGID=${NEW_GID:-1000}
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - TZ=Asia/Jakarta
+      - MYSQL_DATABASE=${MARIADB_DB_NAME} #optional
+      - MYSQL_USER=${MARIADB_ROOT_USER} #optional
+      - MYSQL_PASSWORD=${MARIADB_ROOT_PASSWORD} #optional
+      - REMOTE_SQL=http://URL1/your.sql,https://URL2/your.sql #optional
+    volumes:
+      - pidevs-mariadb:/config
+    ports:
+      - "${LOCAL_LISTEN_ADDR}${HOST_PORT_MARIADB}:3306"
+    networks:
+      app_net:
+        ipv4_address: 172.168.238.11
+    restart: always
+  # ------------------------------------------------------------
+  # PostgreSQL
+  # ------------------------------------------------------------
+  pgsql:
+    image: postgres:12.4
+    hostname: pgsql
+    environment:
+      - POSTGRES_USER=${PGSQL_ROOT_USER}
+      - POSTGRES_PASSWORD=${PGSQL_ROOT_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=${PGSQL_HOST_AUTH_METHOD:-trust}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "${LOCAL_LISTEN_ADDR}${HOST_PORT_PGSQL}:5432"
+    networks:
+      app_net:
+        ipv4_address: 172.168.238.12
+    volumes:
+      # ---- Format: ----
+      # HOST-DIRECTORY : DOCKER-DIRECTORY
+      # Mount PostgreSQL Data directory
+      - pidevs-pgsql:/var/lib/postgresql/data/pgdata:rw${MOUNT_OPTIONS}
+    restart: always
+  # ------------------------------------------------------------
+  # MongoDB
+  # ------------------------------------------------------------
+  mongo:
+    image: webhippie/mongodb:latest-arm32v7 
+    hostname: mongo
+    ports:
+      # [local-machine:]local-port:docker-port
+      - "${LOCAL_LISTEN_ADDR}${HOST_PORT_MONGO}:27017"
+    networks:
+      app_net:
+        ipv4_address: 172.168.238.13
+    volumes:
+      # ---- Format: ----
+      # HOST-DIRECTORY : DOCKER-DIRECTORY
+      # Mount MongoDB Data directory
+      - pidevs-mongo:/data/db:rw${MOUNT_OPTIONS}
+    restart: always
+  # ------------------------------------------------------------
+  # Redis
+  # ------------------------------------------------------------
+  redis:
+    image: redis:6.0
+    hostname: redis
+    # Apply custom arguments to redis startup
+    command: redis-server ${REDIS_ARGS:- }
+    environment:
+      - REDIS_ARGS=${REDIS_ARGS:- }
+    ports:
+      # [local-machine:]local-port:docker-port
+      - "${LOCAL_LISTEN_ADDR}${HOST_PORT_REDIS}:6379"
+    networks:
+      app_net:
+        ipv4_address: 172.168.238.14
+    restart: always
+  # -----------------------------------------------------------------------------------------------
+  # RabbitMQ
+  # -----------------------------------------------------------------------------------------------
+  rabbit:
+    image: rabbitmq:3.8-management
+    hostname: rabbit
+    environment:
+      - RABBITMQ_DEFAULT_VHOST=${RABBIT_DEFAULT_VHOST:-my_vhost}
+      - RABBITMQ_DEFAULT_USER=${RABBIT_DEFAULT_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_DEFAULT_PASS:-guest}
+    ports:
+      - "${LOCAL_LISTEN_ADDR}${HOST_PORT_RABBIT:-5672}:5672"
+      - "${LOCAL_LISTEN_ADDR}${HOST_PORT_RABBIT_MGMT:-15672}:15672"
+    networks:
+      app_net:
+        ipv4_address: 172.168.238.15
+    volumes:
+      - pidevs-rabbit:/var/lib/rabbitmq
+    restart: always
+  # -----------------------------------------------------------------------------------------------
+  # Jaeger
+  # -----------------------------------------------------------------------------------------------
+  jaeger:
+    hostname: jaeger
+    image: darkowlzz/jaeger-all-in-one:1.23
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    networks:
+      app_net:
+        ipv4_address: 172.168.238.16
+    restart: always
+
+################################################################################
+# NETWORK
+################################################################################
+networks:
+  app_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.168.238.0/24
+          gateway: 172.168.238.1
+
+################################################################################
+# VOLUMES
+################################################################################
+volumes:
+  pidevs-rabbit:
+  pidevs-mongo:
+  pidevs-pgsql:
+  pidevs-mariadb:

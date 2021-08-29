@@ -81,6 +81,8 @@ services:
     networks:
       app_net:
         ipv4_address: 172.168.238.14
+    volumes:
+    - pidevs-redis:/data
     restart: always
   # -----------------------------------------------------------------------------------------------
   # RabbitMQ
@@ -145,3 +147,4 @@ volumes:
   pidevs-mongo:
   pidevs-pgsql:
   pidevs-mariadb:
+  pidevs-redis:

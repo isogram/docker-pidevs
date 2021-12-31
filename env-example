@@ -46,3 +46,7 @@ HOST_PORT_REDIS=6379
 ###
 REDIS_ARGS=
 #REDIS_ARGS=--loglevel verbose --requirepass my-redis-root-password
+
+# https://gitlab.comwork.io/oss/elasticstack/elasticstack-arm
+ELASTICSEARCH_VERSION="7.16.1-1.13-arm"
+KIBANA_VERSION="7.16.1-1.7-arm"

@@ -51,7 +51,7 @@ services:
   # MongoDB
   # ------------------------------------------------------------
   mongo:
-    image: webhippie/mongodb:latest-arm32v7 
+    image: webhippie/mongodb:latest-arm32v7
     hostname: mongo
     ports:
       # [local-machine:]local-port:docker-port
@@ -82,7 +82,7 @@ services:
       app_net:
         ipv4_address: 172.168.238.14
     volumes:
-    - pidevs-redis:/data
+      - pidevs-redis:/data
     restart: always
   # -----------------------------------------------------------------------------------------------
   # RabbitMQ
@@ -124,6 +124,39 @@ services:
       app_net:
         ipv4_address: 172.168.238.16
     restart: always
+  # -----------------------------------------------------------------------------------------------
+  # Elasticsearch
+  # -----------------------------------------------------------------------------------------------
+  elasticsearch:
+    hostname: elasticsearch
+    image: comworkio/elasticsearch:${ELASTICSEARCH_VERSION:-7.16.1-1.13-arm}
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - pidevs-esdata:/usr/share/elasticsearch/data
+    networks:
+      app_net:
+        ipv4_address: 172.168.238.17
+    restart: always
+  # -----------------------------------------------------------------------------------------------
+  # Kibana
+  # -----------------------------------------------------------------------------------------------
+  kibana:
+    hostname: kibana
+    image: comworkio/kibana:${KIBANA_VERSION:-7.16.1-1.7-arm}
+    ports:
+      - 5601:5601
+    environment:
+      - ES_PROTO=http
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+    depends_on:
+      - elasticsearch
+    networks:
+      app_net:
+        ipv4_address: 172.168.238.18
+    restart: always
 
 ################################################################################
 # NETWORK
@@ -148,3 +181,4 @@ volumes:
   pidevs-pgsql:
   pidevs-mariadb:
   pidevs-redis:
+  pidevs-esdata:
